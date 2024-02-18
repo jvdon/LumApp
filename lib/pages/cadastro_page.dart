@@ -124,47 +124,50 @@ class _CadastroPageState extends State<CadastroPage> {
                 height: 10,
               ),
               // Carro
-              InputDecorator(
-                decoration: InputDecoration(
-                  labelText: 'Carro',
-                  labelStyle: const TextStyle(fontSize: 24),
-                  enabledBorder: OutlineInputBorder(
-                    borderSide: const BorderSide(color: Colors.white, width: 2),
-                    borderRadius: BorderRadius.circular(10.0),
+              SingleChildScrollView(
+                child: InputDecorator(
+                  decoration: InputDecoration(
+                    labelText: 'Carro',
+                    labelStyle: const TextStyle(fontSize: 24),
+                    enabledBorder: OutlineInputBorder(
+                      borderSide:
+                          const BorderSide(color: Colors.white, width: 2),
+                      borderRadius: BorderRadius.circular(10.0),
+                    ),
                   ),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceAround,
-                  children: [
-                    textInput("Marca", marca, 100, null),
-                    textInput("Modelo", modelo, 100, null),
-                    textInput(
-                      "Ano",
-                      anoMod,
-                      50,
-                      MaskTextInputFormatter(
-                          mask: '####',
-                          filter: {"#": RegExp(r'[0-9]')},
-                          type: MaskAutoCompletionType.lazy),
-                    ),
-                    textInput(
-                      "Ano Modelo",
-                      anoFab,
-                      100,
-                      MaskTextInputFormatter(
-                          mask: '####',
-                          filter: {"#": RegExp(r'[0-9]')},
-                          type: MaskAutoCompletionType.lazy),
-                    ),
-                    DropdownMenu(
-                        controller: tipo,
-                        hintText: "Tipo Carro",
-                        dropdownMenuEntries: TipoCarro.values
-                            .map((e) =>
-                                DropdownMenuEntry(value: e.name, label: e.name))
-                            .toList()),
-                    _buildColorSelector(color)
-                  ],
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceAround,
+                    children: [
+                      textInput("Marca", marca, 100, null),
+                      textInput("Modelo", modelo, 100, null),
+                      textInput(
+                        "Ano",
+                        anoMod,
+                        50,
+                        MaskTextInputFormatter(
+                            mask: '####',
+                            filter: {"#": RegExp(r'[0-9]')},
+                            type: MaskAutoCompletionType.lazy),
+                      ),
+                      textInput(
+                        "Ano Modelo",
+                        anoFab,
+                        100,
+                        MaskTextInputFormatter(
+                            mask: '####',
+                            filter: {"#": RegExp(r'[0-9]')},
+                            type: MaskAutoCompletionType.lazy),
+                      ),
+                      DropdownMenu(
+                          controller: tipo,
+                          hintText: "Tipo Carro",
+                          dropdownMenuEntries: TipoCarro.values
+                              .map((e) => DropdownMenuEntry(
+                                  value: e.name, label: e.name))
+                              .toList()),
+                      _buildColorSelector(color)
+                    ],
+                  ),
                 ),
               ),
               const SizedBox(
@@ -352,7 +355,12 @@ Widget _buildTipoSelector(TextEditingController controller) {
 
 Widget _buildColorSelector(TextEditingController controller) {
   return DropdownMenu(
-      leadingIcon: Icon(Icons.color_lens_outlined, color: controller.text.isNotEmpty ? Cores[Car_Colors.values.byName(controller.text)] : Colors.white,),
+      leadingIcon: Icon(
+        Icons.color_lens_outlined,
+        color: controller.text.isNotEmpty
+            ? Cores[Car_Colors.values.byName(controller.text)]
+            : Colors.white,
+      ),
       label: const Text("Cor"),
       controller: controller,
       dropdownMenuEntries: Car_Colors.values

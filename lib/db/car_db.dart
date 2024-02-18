@@ -24,7 +24,8 @@ CREATE TABLE IF NOT EXISTS carros (
     color TEXT,
     marca TEXT,
     modelo TEXT,
-    ano NUMBER,
+    anoMod NUMBER,
+    anoFab NUMBER,
     vendido BOOLEAN,
     valor FLOAT,
     debitos TEXT DEFAULT "[]"
@@ -80,8 +81,8 @@ CREATE TABLE IF NOT EXISTS carros (
     // Get a reference to the database.
     final db = await _getDatabase();
 
-    final List<Map<String, dynamic>> maps =
-        await db.query('carros', where: "vendido = true AND dataVenda = $month");
+    final List<Map<String, dynamic>> maps = await db.query('carros',
+        where: "vendido = true AND dataVenda = $month");
 
     return List.generate(
       maps.length,
@@ -110,8 +111,8 @@ CREATE TABLE IF NOT EXISTS carros (
     // Get a reference to the database.
     final db = await _getDatabase();
 
-    final List<Map<String, dynamic>> maps =
-        await db.query('carros', where: "vendido = false AND dataVenda = $month");
+    final List<Map<String, dynamic>> maps = await db.query('carros',
+        where: "vendido = false AND dataVenda = $month");
 
     return List.generate(
       maps.length,

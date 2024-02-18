@@ -85,7 +85,7 @@ class _BoughtPageState extends State<BoughtPage> {
                 body: Column(
                   children: [
                     Expanded(
-                      flex: 4,
+                      flex: 5,
                       child: Container(
                         decoration: BoxDecoration(
                             border:
@@ -102,12 +102,16 @@ class _BoughtPageState extends State<BoughtPage> {
                             ListTile(
                                 title: Text("Dispesa Total:"),
                                 subtitle: Text("R\$ ${custoTotal}")),
+                            ListTile(
+                                title: Text("Gasto Total:"),
+                                subtitle: Text("R\$ ${valorTotal+custoTotal}")),
+                            
                           ],
                         ),
                       ),
                     ),
                     Expanded(
-                      flex: 7,
+                      flex: 6,
                       child: (carros.isNotEmpty)
                           ? ListView.builder(
                               itemCount: carros.length,

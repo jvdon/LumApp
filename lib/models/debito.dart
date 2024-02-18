@@ -9,7 +9,7 @@ class Debito {
     tipoDebito = TipoDebito.values.byName(
         json["tipoDebito"]); //  strToTipo[json["tipoDebito"] as String]!;
     valor = json["valor"];
-    info = json["info"];
+    info = json["info"] ?? "";
   }
 
   Map<String, dynamic> toMap() {

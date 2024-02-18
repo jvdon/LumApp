@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:lumapp/db/car_db.dart';
 import 'package:lumapp/models/car.dart';
+import 'package:lumapp/models/debito.dart';
 import 'package:lumapp/pages/cadastro_page.dart';
 
 class CarItem extends StatefulWidget {
@@ -30,7 +31,7 @@ class _CarItemState extends State<CarItem> {
           builder: (context) {
             return Dialog(
               child: Container(
-                height: 500,
+                height: 600,
                 width: 400,
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.start,
@@ -41,6 +42,7 @@ class _CarItemState extends State<CarItem> {
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
                         Expanded(
+                          flex: 2,
                           child: Column(
                             children: [
                               SizedBox(
@@ -53,7 +55,7 @@ class _CarItemState extends State<CarItem> {
                               ),
                               _buildDisplay(
                                   "Mes",
-                                  Meses.values[widget.carro.dataVenda-1].name,
+                                  Meses.values[widget.carro.dataVenda - 1].name,
                                   Icons.date_range),
                               SizedBox(
                                 height: 10,
@@ -91,6 +93,7 @@ class _CarItemState extends State<CarItem> {
                           ),
                         ),
                         Expanded(
+                          flex: 4,
                           child: InputDecorator(
                             decoration: InputDecoration(
                               labelText: "Debitos",
@@ -103,16 +106,45 @@ class _CarItemState extends State<CarItem> {
                             ),
                             child: Column(
                               children: widget.carro.debitos
-                                  .map((e) => _buildDisplay(e.tipoDebito.name,
-                                      e.valor.toString(), Icons.numbers))
+                                  .map((e) => InputDecorator(
+                                        decoration: InputDecoration(
+                                          icon: Icon(
+                                            Icons.numbers,
+                                            size: 16,
+                                          ),
+                                          // labelText: e.tipoDebito.name,
+                                          labelStyle:
+                                              const TextStyle(fontSize: 16),
+                                          enabledBorder: OutlineInputBorder(
+                                            borderSide: const BorderSide(
+                                                color: Colors.white, width: 2),
+                                            borderRadius:
+                                                BorderRadius.circular(10.0),
+                                          ),
+                                        ),
+                                        child: Column(
+                                          children: [
+                                            Text(e.tipoDebito.name),
+                                            Text(
+                                              "R\$ ${e.valor}",
+                                            ),
+                                            Text("Info: : ${e.info}")
+                                          ],
+                                        ),
+                                      ))
                                   .toList(),
                             ),
                           ),
                         )
                       ],
                     ),
-                    SizedBox(height: 10,),
-                    _buildDisplay("Lucro", "R\$ ${widget.carro.valor-widget.carro.totalDebitos}", Icons.numbers)
+                    SizedBox(
+                      height: 10,
+                    ),
+                    _buildDisplay(
+                        "Lucro",
+                        "R\$ ${widget.carro.valor - widget.carro.totalDebitos}",
+                        Icons.numbers)
                   ],
                 ),
               ),
@@ -136,6 +168,7 @@ class _CarItemState extends State<CarItem> {
                     return Dialog(
                       child: Container(
                         width: 200,
+                        height: 200,
                         child: Column(
                           children: [
                             Text(

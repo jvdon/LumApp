@@ -9,15 +9,9 @@ CREATE TABLE IF NOT EXISTS carros (
     color TEXT,
     marca TEXT,
     modelo TEXT,
-    ano NUMBER,
+    anoMod NUMBER,
+    anoFab NUMBER,
     vendido BOOLEAN,
     valor FLOAT,
     debitos TEXT DEFAULT "[]"
-);
-
-CREATE TABLE IF NOT EXISTS clientes (
-    nome TEXT PRIMARY KEY,
-    CPF TEXT,
-    telefone TEXT,
-    endereco TEXT
 );

@@ -415,7 +415,7 @@ Widget _buildClientCadastro(context) {
               Expanded(
                 child: TextFormField(
                   controller: CPF,
-                  decoration: const InputDecoration(label: Text("CPF: ")),
+                  decoration: const InputDecoration(label: Text("CNPJ: ")),
                   validator: (value) => Validador()
                       .add(Validar.OBRIGATORIO, msg: "Campo Obrigatorio")
                       .add(Validar.CNPJ, msg: "CPF Invalido")

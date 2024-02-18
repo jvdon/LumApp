@@ -16,7 +16,11 @@ class CarDB {
 CREATE TABLE IF NOT EXISTS carros (
     id INTEGER PRIMARY KEY,
     cliente TEXT,
-    placa VARCHAR(8) UNIQUE,
+    placa TEXT UNIQUE,
+    renavam TEXT,
+    chassi TEXT,
+    dataVenda INTEGER,
+    tipo TEXT,
     color TEXT,
     marca TEXT,
     modelo TEXT,
@@ -24,7 +28,8 @@ CREATE TABLE IF NOT EXISTS carros (
     vendido BOOLEAN,
     valor FLOAT,
     debitos TEXT DEFAULT "[]"
-);""";
+);
+""";
 
     return openDatabase(
       path,
@@ -47,6 +52,7 @@ CREATE TABLE IF NOT EXISTS carros (
     final db = await _getDatabase();
 
     print(carro.toMap());
+    // carro.toMap().forEach((key, value) { print(value.runtimeType);});
 
     await db.insert(
       'carros',
@@ -61,6 +67,21 @@ CREATE TABLE IF NOT EXISTS carros (
 
     final List<Map<String, dynamic>> maps =
         await db.query('carros', where: "vendido = true");
+
+    return List.generate(
+      maps.length,
+      (i) {
+        return Car.fromJSON(maps[i]);
+      },
+    );
+  }
+
+  Future<List<Car>> vendidosByMonth(int month) async {
+    // Get a reference to the database.
+    final db = await _getDatabase();
+
+    final List<Map<String, dynamic>> maps =
+        await db.query('carros', where: "vendido = true AND dataVenda = $month");
 
     return List.generate(
       maps.length,
@@ -85,9 +106,25 @@ CREATE TABLE IF NOT EXISTS carros (
     );
   }
 
-  Future<void> venderCarro(int id) async {
+  Future<List<Car>> estoqueByMonth(int month) async {
+    // Get a reference to the database.
     final db = await _getDatabase();
 
-    await db.update('carros', {"vendido": 1}, where: "id = $id");
+    final List<Map<String, dynamic>> maps =
+        await db.query('carros', where: "vendido = false AND dataVenda = $month");
+
+    return List.generate(
+      maps.length,
+      (i) {
+        return Car.fromJSON(maps[i]);
+      },
+    );
+  }
+
+  Future<void> venderCarro(int id, double valor) async {
+    final db = await _getDatabase();
+
+    await db.update('carros', {"vendido": 1, 'valor': valor},
+        where: "id = $id");
   }
 }

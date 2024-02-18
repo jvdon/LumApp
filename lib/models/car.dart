@@ -6,13 +6,24 @@ import 'package:lumapp/models/debito.dart';
 class Car {
   late int id;
   late String cliente;
+
+  // Info
   late String placa;
+  late String chassi;
+  late String renavam;
+
+  // Carro
   late Car_Colors color;
   late String marca;
   late String modelo;
-  late int ano;
-  late bool vendido;
+  late int anoMod;
+  late int anoFab;
+  late TipoCarro tipo;
+
+  // Venda
   late double valor;
+  late int dataVenda;
+  late bool vendido;
 
   late List<Debito> debitos;
   double totalDebitos = 0;
@@ -21,8 +32,13 @@ class Car {
     required this.cliente,
     required this.placa,
     required this.marca,
+    required this.chassi,
+    required this.renavam,
+    required this.tipo,
+    required this.dataVenda,
     required this.modelo,
-    required this.ano,
+    required this.anoMod,
+    required this.anoFab,
     required this.vendido,
     required this.color,
     required this.debitos,
@@ -35,51 +51,53 @@ class Car {
 
   Car.fromJSON(Map json) {
     // json.forEach((key, value) { print(value.runtimeType);});
-
     id = json["id"];
+    // Info
     cliente = json["cliente"] as String;
     placa = json["placa"] as String;
-    color = strToColor[json["color"] as String]!;
+    chassi = json["chassi"];
+    renavam = json["renavam"];
+
+    // Carro
     marca = json["marca"] as String;
     modelo = json["modelo"] as String;
-    ano = json["ano"];
-    vendido = json["vendido"] == 1 ? true : false;
+    anoMod = json["anoMod"];
+    anoFab = json["anoFab"];
+    color = Car_Colors.values.byName(json["color"]);
+    tipo = TipoCarro.values.byName(json["tipo"]);
 
+    // Venda
+    vendido = json["vendido"] == 1 ? true : false;
+    valor = json["valor"];
+    dataVenda = json["dataVenda"];
     debitos = (jsonDecode(json["debitos"]) as List)
         .map((e) => Debito.fromJSON(e))
         .toList();
-    
+
     for (Debito debito in debitos) {
       totalDebitos += debito.valor;
     }
-    
-    debitos.map((e) => totalDebitos += e.valor);
-    valor = json["valor"];
   }
 
   Map<String, dynamic> toMap() {
     return {
       "placa": placa,
       "color": color.name,
-      "cliente":cliente,
+      "cliente": cliente,
+      "tipo": tipo.name,
+      "renavam": renavam,
+      "chassi": chassi,
       "marca": marca,
       "modelo": modelo,
-      "ano": ano,
+      "anoMod": anoMod,
+      "anoFab": anoFab,
       "vendido": vendido ? 1 : 0,
       "valor": valor,
+      "dataVenda": dataVenda,
       "debitos": jsonEncode(debitos.map((e) => e.toMap()).toList()),
     };
   }
 }
-
-Map<String, Car_Colors> strToColor = {
-  "PRETO": Car_Colors.PRETO,
-  "CHUMBO": Car_Colors.CHUMBO,
-  "PRATA": Car_Colors.PRATA,
-  "BRANCO": Car_Colors.BRANCO,
-  "VERMELHO": Car_Colors.VERMELHO,
-  "AZUL": Car_Colors.AZUL
-};
 
 final Map<Car_Colors, Color> Cores = {
   Car_Colors.PRETO: Colors.black,
@@ -90,4 +108,33 @@ final Map<Car_Colors, Color> Cores = {
   Car_Colors.VERMELHO: Colors.red[400]!
 };
 
-enum Car_Colors { PRETO, CHUMBO, PRATA, BRANCO, AZUL, VERMELHO }
+enum Car_Colors {
+  PRETO,
+  CHUMBO,
+  PRATA,
+  BRANCO,
+  AZUL,
+  VERMELHO,
+}
+
+enum TipoCarro {
+  GASOLINA,
+  DIESEL,
+  FLEX,
+  ALCOOL,
+}
+
+enum Meses {
+  JANEIRO,
+  FEVEREIRO,
+  MARCO,
+  ABRIL,
+  MAIO,
+  JUNHO,
+  JULHO,
+  AGOSTO,
+  SETEMBRO,
+  OUTUBRO,
+  NOVEMBRO,
+  DEZEMBRO
+}

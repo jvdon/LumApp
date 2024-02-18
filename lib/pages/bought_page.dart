@@ -13,6 +13,10 @@ class BoughtPage extends StatefulWidget {
 }
 
 class _BoughtPageState extends State<BoughtPage> {
+  Future vendidos = CarDB().vendidos();
+  int month = DateTime.now().month-1;
+
+
   refresh() {
     setState(() {});
   }
@@ -50,6 +54,24 @@ class _BoughtPageState extends State<BoughtPage> {
               return Scaffold(
                 appBar: AppBar(
                   title: Text("Carros comprados"),
+                  actions: [
+                    DropdownMenu(
+                      initialSelection: month,
+                      dropdownMenuEntries: Meses.values
+                          .map((e) =>
+                              DropdownMenuEntry(label: e.name, value: e.index))
+                          .toList(),
+                      onSelected: (value) {
+                        if (value != null) {
+                          setState(() {
+                            month = value;
+                            vendidos = CarDB().estoqueByMonth(value + 1);
+                          });
+                        }
+                        print(value);
+                      },
+                    ),
+                  ],
                 ),
                 floatingActionButton: FloatingActionButton(
                   child: Icon(Icons.add, size: 32),
@@ -63,7 +85,7 @@ class _BoughtPageState extends State<BoughtPage> {
                 body: Column(
                   children: [
                     Expanded(
-                      flex: 2,
+                      flex: 4,
                       child: Container(
                         decoration: BoxDecoration(
                             border:
@@ -91,7 +113,10 @@ class _BoughtPageState extends State<BoughtPage> {
                               itemCount: carros.length,
                               itemBuilder: (context, index) {
                                 Car carro = carros[index];
-                                return CarItem(carro: carro, notifyParent: refresh,);
+                                return CarItem(
+                                  carro: carro,
+                                  notifyParent: refresh,
+                                );
                               },
                             )
                           : Center(

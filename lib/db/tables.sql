@@ -1,8 +1,11 @@
 CREATE TABLE IF NOT EXISTS carros (
     id INTEGER PRIMARY KEY,
     cliente TEXT,
-    placaBR VARCHAR(7) UNIQUE,
-    placaMS VARCHAR(7) UNIQUE,
+    placa TEXT UNIQUE,
+    renavam TEXT,
+    chassi TEXT,
+    dataVenda INTEGER,
+    tipo TEXT,
     color TEXT,
     marca TEXT,
     modelo TEXT,
@@ -13,8 +16,8 @@ CREATE TABLE IF NOT EXISTS carros (
 );
 
 CREATE TABLE IF NOT EXISTS clientes (
-    nome TEXT,
-    CPF TEXT  PRIMARY KEY,
+    nome TEXT PRIMARY KEY,
+    CPF TEXT,
     telefone TEXT,
     endereco TEXT
 );

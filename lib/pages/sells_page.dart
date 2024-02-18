@@ -13,6 +13,9 @@ class SellsPage extends StatefulWidget {
 }
 
 class _SellsPageState extends State<SellsPage> {
+  Future vendidos = CarDB().vendidos();
+  int month = DateTime.now().month-1;
+
   refresh() {
     setState(() {});
   }
@@ -20,7 +23,7 @@ class _SellsPageState extends State<SellsPage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: CarDB().vendidos(),
+      future: vendidos,
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -50,6 +53,24 @@ class _SellsPageState extends State<SellsPage> {
               return Scaffold(
                 appBar: AppBar(
                   title: Text("Carros vendidos"),
+                  actions: [
+                    DropdownMenu(
+                      initialSelection: month,
+                      dropdownMenuEntries: Meses.values
+                          .map((e) =>
+                              DropdownMenuEntry(label: e.name, value: e.index))
+                          .toList(),
+                      onSelected: (value) {
+                        if (value != null) {
+                          setState(() {
+                            month = value;
+                            vendidos = CarDB().vendidosByMonth(value + 1);
+                          });
+                        }
+                        print(value);
+                      },
+                    ),
+                  ],
                 ),
                 floatingActionButton: FloatingActionButton(
                   child: Icon(Icons.add, size: 32),
@@ -89,7 +110,7 @@ class _SellsPageState extends State<SellsPage> {
                       ),
                     ),
                     Expanded(
-                      flex: 4,
+                      flex: 2,
                       child: (carros.isNotEmpty)
                           ? ListView.builder(
                               itemCount: carros.length,

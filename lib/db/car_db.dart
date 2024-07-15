@@ -62,6 +62,17 @@ CREATE TABLE IF NOT EXISTS carros (
     );
   }
 
+  Future<void> deleteCarro(Car carro) async {
+    final db = await _getDatabase();
+    await db.delete('carros', where: 'id = ${carro.id}');
+  }
+
+  Future<void> update(Car carro, int id) async {
+    final db = await _getDatabase();
+
+    await db.update('carros', carro.toMap(), where: 'id = $id');
+  }
+
   Future<List<Car>> vendidos() async {
     // Get a reference to the database.
     final db = await _getDatabase();

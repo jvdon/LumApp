@@ -96,7 +96,14 @@ class _CadastroPageState extends State<CadastroPage> {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      textInput("Cliente", cliente, 200, null),
+                      textInput(
+                          (widget.tipoCadastro == TipoCadastro.COMPRA)
+                              ? "Comprador"
+                              : "Vendedor",
+                          cliente,
+                          200,
+                          null,
+                          maxLength: 200),
                       textInput("RENAVAM", revavam, 200, null),
                       textInput("CHASSI", chassi, 200, null),
                       textInput(
@@ -225,6 +232,9 @@ class _CadastroPageState extends State<CadastroPage> {
                                     TextEditingController info =
                                         TextEditingController();
 
+                                    TextEditingController amount =
+                                        TextEditingController();
+
                                     MoneyMaskedTextController valor =
                                         MoneyMaskedTextController(
                                             decimalSeparator: ",",
@@ -234,7 +244,7 @@ class _CadastroPageState extends State<CadastroPage> {
                                     return Dialog(
                                       child: Container(
                                         width: 200,
-                                        height: 260,
+                                        height: 350,
                                         child: Column(
                                           mainAxisSize: MainAxisSize.max,
                                           mainAxisAlignment:
@@ -245,6 +255,8 @@ class _CadastroPageState extends State<CadastroPage> {
                                                 maxLength: 200),
                                             textInput(
                                                 "Valor", valor, 150, null),
+                                            textInput(
+                                                "Amount", amount, 150, null),
                                             IconButton(
                                               onPressed: () {
                                                 if (tipo.text.isNotEmpty &&
@@ -256,8 +268,16 @@ class _CadastroPageState extends State<CadastroPage> {
                                                       info: info.text,
                                                       valor: valor.numberValue);
                                                   setState(() {
-                                                    debitoTotal += debito.valor;
-                                                    debitos.add(debito);
+                                                    int amountInt =
+                                                        int.tryParse(amount.text) ?? 1;
+
+                                                    for (var i = 0;
+                                                        i < amountInt;
+                                                        i++) {
+                                                      debitoTotal +=
+                                                          debito.valor;
+                                                      debitos.add(debito);
+                                                    }
                                                     Navigator.of(context).pop();
                                                   });
                                                 }
@@ -355,17 +375,18 @@ Widget _buildTipoSelector(TextEditingController controller) {
 
 Widget _buildColorSelector(TextEditingController controller) {
   return DropdownMenu(
-      leadingIcon: Icon(
-        Icons.color_lens_outlined,
-        color: controller.text.isNotEmpty
-            ? Cores[Car_Colors.values.byName(controller.text)]
-            : Colors.white,
-      ),
-      label: const Text("Cor"),
-      controller: controller,
-      dropdownMenuEntries: Car_Colors.values
-          .map((e) => DropdownMenuEntry(value: e, label: e.name))
-          .toList());
+    leadingIcon: Icon(
+      Icons.color_lens_outlined,
+      color: controller.text.isNotEmpty
+          ? Cores[Car_Colors.values.byName(controller.text)]
+          : Colors.white,
+    ),
+    label: const Text("Cor"),
+    controller: controller,
+    dropdownMenuEntries: Car_Colors.values
+        .map((e) => DropdownMenuEntry(value: e, label: e.name))
+        .toList(),
+  );
 }
 
 Widget textInput(String label, TextEditingController controller, double width,

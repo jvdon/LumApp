@@ -1,5 +1,6 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:lumapp/db/car_db.dart';
 import 'package:lumapp/models/car.dart';
 import 'package:lumapp/pages/cadastro_page.dart';
@@ -14,8 +15,10 @@ class BoughtPage extends StatefulWidget {
 
 class _BoughtPageState extends State<BoughtPage> {
   Future vendidos = CarDB().vendidos();
-  int month = DateTime.now().month-1;
+  int month = DateTime.now().month - 1;
 
+  MoneyMaskedTextController dinheiroCaixa = MoneyMaskedTextController(
+      decimalSeparator: ",", thousandSeparator: ".", leftSymbol: "R\$ ");
 
   refresh() {
     setState(() {});
@@ -51,10 +54,12 @@ class _BoughtPageState extends State<BoughtPage> {
                 custoTotal += carro.totalDebitos;
               }
 
+
               return Scaffold(
                 appBar: AppBar(
                   title: Text("Carros comprados"),
                   actions: [
+                    IconButton(onPressed: refresh, icon: Icon(Icons.refresh)),
                     DropdownMenu(
                       initialSelection: month,
                       dropdownMenuEntries: Meses.values
@@ -84,8 +89,8 @@ class _BoughtPageState extends State<BoughtPage> {
                 ),
                 body: Column(
                   children: [
-                    Expanded(
-                      flex: 5,
+                    Container(
+                      height: 300,
                       child: Container(
                         decoration: BoxDecoration(
                             border:
@@ -104,14 +109,19 @@ class _BoughtPageState extends State<BoughtPage> {
                                 subtitle: Text("R\$ ${custoTotal}")),
                             ListTile(
                                 title: Text("Gasto Total:"),
-                                subtitle: Text("R\$ ${valorTotal+custoTotal}")),
-                            
+                                subtitle:
+                                    Text("R\$ ${valorTotal + custoTotal}")),
+                            // ListTile(
+                            //   title: Text("Dinheiro Em Caixa"),
+                            //   subtitle: textInput("Dinheiro Em Caixa",
+                            //       dinheiroCaixa, 150, null),
+                            // )
                           ],
                         ),
                       ),
                     ),
                     Expanded(
-                      flex: 6,
+                      flex: 4,
                       child: (carros.isNotEmpty)
                           ? ListView.builder(
                               itemCount: carros.length,

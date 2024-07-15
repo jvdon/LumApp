@@ -105,7 +105,8 @@ final Map<Car_Colors, Color> Cores = {
   Car_Colors.PRATA: Colors.grey[700]!,
   Car_Colors.BRANCO: Colors.white,
   Car_Colors.AZUL: Colors.blueAccent[700]!,
-  Car_Colors.VERMELHO: Colors.red[400]!
+  Car_Colors.VERMELHO: Colors.red[400]!,
+  Car_Colors.OUTRO: Colors.greenAccent.shade700
 };
 
 enum Car_Colors {
@@ -115,6 +116,7 @@ enum Car_Colors {
   BRANCO,
   AZUL,
   VERMELHO,
+  OUTRO
 }
 
 enum TipoCarro {

@@ -14,7 +14,7 @@ class SellsPage extends StatefulWidget {
 
 class _SellsPageState extends State<SellsPage> {
   Future vendidos = CarDB().vendidos();
-  int month = DateTime.now().month-1;
+  int month = DateTime.now().month - 1;
 
   refresh() {
     setState(() {});
@@ -23,7 +23,7 @@ class _SellsPageState extends State<SellsPage> {
   @override
   Widget build(BuildContext context) {
     return FutureBuilder(
-      future: vendidos,
+      future: CarDB().vendidos(),
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
@@ -54,6 +54,7 @@ class _SellsPageState extends State<SellsPage> {
                 appBar: AppBar(
                   title: Text("Carros vendidos"),
                   actions: [
+                    IconButton(onPressed: refresh, icon: Icon(Icons.refresh)),
                     DropdownMenu(
                       initialSelection: month,
                       dropdownMenuEntries: Meses.values

@@ -59,6 +59,7 @@ dev_dependencies:
   mask_text_input_formatter: ^2.7.0
   pix_flutter: ^2.2.0
   qr_flutter: ^4.1.0
+  shared_preferences:
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

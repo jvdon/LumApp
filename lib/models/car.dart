@@ -2,6 +2,7 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:lumapp/models/debito.dart';
+import 'package:lumapp/models/procuracao.dart';
 
 class Car {
   late int id;
@@ -22,11 +23,13 @@ class Car {
 
   // Venda
   late double valor;
-  late int dataVenda;
+  late DateTime dataVenda;
   late bool vendido;
 
   late List<Debito> debitos;
   double totalDebitos = 0;
+
+  late List<Procuracao> procuracoes;
 
   Car({
     required this.cliente,
@@ -43,10 +46,9 @@ class Car {
     required this.color,
     required this.debitos,
     required this.valor,
+    required this.procuracoes,
   }) {
-    for (var e in debitos) {
-      totalDebitos += e.valor;
-    }
+    totalDebitos = debitos.isEmpty ? 0 : debitos.map((e) => e.valor).reduce((a, b) => a + b);
   }
 
   Car.fromJSON(Map json) {
@@ -69,14 +71,12 @@ class Car {
     // Venda
     vendido = json["vendido"] == 1 ? true : false;
     valor = json["valor"];
-    dataVenda = json["dataVenda"];
-    debitos = (jsonDecode(json["debitos"]) as List)
-        .map((e) => Debito.fromJSON(e))
-        .toList();
+    dataVenda = DateTime.fromMillisecondsSinceEpoch(json["dataVenda"]);
+    debitos = (jsonDecode(json["debitos"]) as List).map((e) => Debito.fromJSON(e)).toList();
 
-    for (Debito debito in debitos) {
-      totalDebitos += debito.valor;
-    }
+    totalDebitos = debitos.isEmpty ? 0 : debitos.map((e) => e.valor).reduce((a, b) => a + b);
+
+    procuracoes = (jsonDecode(json["procuracoes"]) as List).map((e) => Procuracao.fromJson(e)).toList();
   }
 
   Map<String, dynamic> toMap() {
@@ -93,8 +93,9 @@ class Car {
       "anoFab": anoFab,
       "vendido": vendido ? 1 : 0,
       "valor": valor,
-      "dataVenda": dataVenda,
+      "dataVenda": dataVenda.millisecondsSinceEpoch,
       "debitos": jsonEncode(debitos.map((e) => e.toMap()).toList()),
+      "procuracoes": jsonEncode(this.procuracoes.map((e) => e.toMap()).toList()),
     };
   }
 }
@@ -109,15 +110,7 @@ final Map<Car_Colors, Color> Cores = {
   Car_Colors.OUTRO: Colors.greenAccent.shade700
 };
 
-enum Car_Colors {
-  PRETO,
-  CHUMBO,
-  PRATA,
-  BRANCO,
-  AZUL,
-  VERMELHO,
-  OUTRO
-}
+enum Car_Colors { PRETO, CHUMBO, PRATA, BRANCO, AZUL, VERMELHO, OUTRO }
 
 enum TipoCarro {
   GASOLINA,
@@ -126,17 +119,4 @@ enum TipoCarro {
   ALCOOL,
 }
 
-enum Meses {
-  JANEIRO,
-  FEVEREIRO,
-  MARCO,
-  ABRIL,
-  MAIO,
-  JUNHO,
-  JULHO,
-  AGOSTO,
-  SETEMBRO,
-  OUTUBRO,
-  NOVEMBRO,
-  DEZEMBRO
-}
+enum Meses { JANEIRO, FEVEREIRO, MARCO, ABRIL, MAIO, JUNHO, JULHO, AGOSTO, SETEMBRO, OUTUBRO, NOVEMBRO, DEZEMBRO }

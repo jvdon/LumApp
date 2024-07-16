@@ -1,10 +1,14 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:lumapp/db/car_db.dart';
 import 'package:lumapp/models/car.dart';
 import 'package:lumapp/pages/cadastro_page.dart';
 import 'package:lumapp/partials/car_item.dart';
+import 'package:lumapp/partials/displays.dart';
+import 'package:intl/intl.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class BoughtPage extends StatefulWidget {
   const BoughtPage({super.key});
@@ -17,11 +21,14 @@ class _BoughtPageState extends State<BoughtPage> {
   Future vendidos = CarDB().vendidos();
   int month = DateTime.now().month - 1;
 
-  MoneyMaskedTextController dinheiroCaixa = MoneyMaskedTextController(
-      decimalSeparator: ",", thousandSeparator: ".", leftSymbol: "R\$ ");
-
   refresh() {
     setState(() {});
+  }
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
   }
 
   @override
@@ -31,7 +38,7 @@ class _BoughtPageState extends State<BoughtPage> {
       builder: (context, snapshot) {
         switch (snapshot.connectionState) {
           case ConnectionState.waiting:
-            return CircularProgressIndicator();
+            return const CircularProgressIndicator();
           case ConnectionState.done:
             if (snapshot.hasError) {
               return Center(
@@ -41,7 +48,7 @@ class _BoughtPageState extends State<BoughtPage> {
                       Icons.error_outline,
                       color: Colors.red[600],
                     ),
-                    Text("Error fetching data")
+                    const Text("Error fetching data")
                   ],
                 ),
               );
@@ -49,23 +56,21 @@ class _BoughtPageState extends State<BoughtPage> {
               List<Car> carros = snapshot.data!;
               double valorTotal = 0;
               double custoTotal = 0;
+
               for (var carro in carros) {
                 valorTotal += carro.valor;
                 custoTotal += carro.totalDebitos;
               }
 
-
               return Scaffold(
                 appBar: AppBar(
-                  title: Text("Carros comprados"),
+                  title: const Text("Carros comprados"),
                   actions: [
-                    IconButton(onPressed: refresh, icon: Icon(Icons.refresh)),
+                    IconButton(onPressed: refresh, icon: const Icon(Icons.refresh)),
                     DropdownMenu(
                       initialSelection: month,
-                      dropdownMenuEntries: Meses.values
-                          .map((e) =>
-                              DropdownMenuEntry(label: e.name, value: e.index))
-                          .toList(),
+                      dropdownMenuEntries:
+                          Meses.values.map((e) => DropdownMenuEntry(label: e.name, value: e.index)).toList(),
                       onSelected: (value) {
                         if (value != null) {
                           setState(() {
@@ -73,49 +78,97 @@ class _BoughtPageState extends State<BoughtPage> {
                             vendidos = CarDB().estoqueByMonth(value + 1);
                           });
                         }
-                        print(value);
                       },
                     ),
                   ],
                 ),
                 floatingActionButton: FloatingActionButton(
-                  child: Icon(Icons.add, size: 32),
+                  child: const Icon(Icons.add, size: 32),
                   onPressed: () {
                     Navigator.of(context).push(MaterialPageRoute(
-                      builder: (context) =>
-                          CadastroPage(tipoCadastro: TipoCadastro.COMPRA),
+                      builder: (context) => const CadastroPage(tipoCadastro: TipoCadastro.COMPRA),
                     ));
                   },
                 ),
                 body: Column(
                   children: [
                     Container(
-                      height: 300,
+                      height: 380,
                       child: Container(
-                        decoration: BoxDecoration(
-                            border:
-                                Border.all(color: Colors.blue[700]!, width: 3)),
+                        decoration: BoxDecoration(border: Border.all(color: Colors.blue[700]!, width: 3)),
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.start,
                           children: [
                             ListTile(
-                                title: Text("Carros comprados:"),
+                                leading: const Icon(CupertinoIcons.money_dollar),
+                                title: const Text("Carros comprados:"),
                                 subtitle: Text(carros.length.toString())),
                             ListTile(
-                                title: Text("Valor Total:"),
+                                leading: const Icon(CupertinoIcons.money_dollar),
+                                title: const Text("Valor Total:"),
                                 subtitle: Text("R\$ ${valorTotal}")),
                             ListTile(
-                                title: Text("Dispesa Total:"),
+                                leading: const Icon(CupertinoIcons.money_dollar),
+                                title: const Text("Dispesa Total:"),
                                 subtitle: Text("R\$ ${custoTotal}")),
                             ListTile(
-                                title: Text("Gasto Total:"),
-                                subtitle:
-                                    Text("R\$ ${valorTotal + custoTotal}")),
-                            // ListTile(
-                            //   title: Text("Dinheiro Em Caixa"),
-                            //   subtitle: textInput("Dinheiro Em Caixa",
-                            //       dinheiroCaixa, 150, null),
-                            // )
+                                leading: const Icon(CupertinoIcons.money_dollar),
+                                title: const Text("Gasto Total:"),
+                                subtitle: Text("R\$ ${valorTotal + custoTotal}")),
+                            FutureBuilder(
+                              future: SharedPreferences.getInstance(),
+                              builder: (context, snapshot) {
+                                switch (snapshot.connectionState) {
+                                  case ConnectionState.done:
+                                    if (snapshot.hasError) {
+                                      return const ListTile(
+                                        leading: Icon(Icons.error),
+                                        title: Text("Error fetching"),
+                                      );
+                                    } else {
+                                      SharedPreferences preferences = snapshot.requireData;
+                                      MoneyMaskedTextController dinheiroCaixa = MoneyMaskedTextController(
+                                          decimalSeparator: ",",
+                                          thousandSeparator: ".",
+                                          leftSymbol: "R\$",
+                                          initialValue: double.parse(preferences.getString("caixa") ?? "-1"));
+                                      return ListTile(
+                                        leading: const Icon(CupertinoIcons.money_dollar),
+                                        title: Row(
+                                          children: [
+                                            textInput("Dinheiro Em Caixa", dinheiroCaixa, 200, null),
+                                            const SizedBox(width: 10),
+                                            IconButton(
+                                              onPressed: () async {
+                                                bool ok = await preferences.setString(
+                                                    "caixa", dinheiroCaixa.numberValue.toString());
+                                                if (ok) {
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text("Salvo"),
+                                                    ),
+                                                  );
+                                                } else {
+                                                  ScaffoldMessenger.of(context).showSnackBar(
+                                                    const SnackBar(
+                                                      content: Text("Error"),
+                                                    ),
+                                                  );
+                                                }
+                                              },
+                                              icon: const Icon(Icons.save),
+                                            ),
+                                          ],
+                                        ),
+                                      );
+                                    }
+                                  case ConnectionState.waiting:
+                                    return const CircularProgressIndicator();
+                                  default:
+                                    return const Text("Unable to fetch");
+                                }
+                              },
+                            )
                           ],
                         ),
                       ),
@@ -141,7 +194,7 @@ class _BoughtPageState extends State<BoughtPage> {
                                     Icons.warning,
                                     color: Colors.yellow[600],
                                   ),
-                                  Text("Não há carros comprados")
+                                  const Text("Não há carros comprados")
                                 ],
                               ),
                             ),
@@ -158,7 +211,7 @@ class _BoughtPageState extends State<BoughtPage> {
                     Icons.error_outline,
                     color: Colors.red[600],
                   ),
-                  Text("Error fetching data")
+                  const Text("Error fetching data")
                 ],
               ),
             );

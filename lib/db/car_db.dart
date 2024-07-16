@@ -13,24 +13,25 @@ class CarDB {
 
     String path = join(documentsDirectory.path, "lumapp.db");
     String sql = """
-CREATE TABLE IF NOT EXISTS carros (
-    id INTEGER PRIMARY KEY,
-    cliente TEXT,
-    placa TEXT UNIQUE,
-    renavam TEXT,
-    chassi TEXT,
-    dataVenda INTEGER,
-    tipo TEXT,
-    color TEXT,
-    marca TEXT,
-    modelo TEXT,
-    anoMod NUMBER,
-    anoFab NUMBER,
-    vendido BOOLEAN,
-    valor FLOAT,
-    debitos TEXT DEFAULT "[]"
-);
-""";
+    CREATE TABLE IF NOT EXISTS carros (
+        id INTEGER PRIMARY KEY,
+        cliente TEXT,
+        placa TEXT UNIQUE,
+        renavam TEXT,
+        chassi TEXT,
+        dataVenda INTEGER,
+        tipo TEXT,
+        color TEXT,
+        marca TEXT,
+        modelo TEXT,
+        anoMod NUMBER,
+        anoFab NUMBER,
+        vendido BOOLEAN,
+        valor FLOAT,
+        debitos TEXT DEFAULT "[]",
+        procuracoes TEXT DEFAULT "[]"
+    );
+    """;
 
     return openDatabase(
       path,
@@ -77,8 +78,7 @@ CREATE TABLE IF NOT EXISTS carros (
     // Get a reference to the database.
     final db = await _getDatabase();
 
-    final List<Map<String, dynamic>> maps =
-        await db.query('carros', where: "vendido = true");
+    final List<Map<String, dynamic>> maps = await db.query('carros', where: "vendido = true");
 
     return List.generate(
       maps.length,
@@ -92,23 +92,21 @@ CREATE TABLE IF NOT EXISTS carros (
     // Get a reference to the database.
     final db = await _getDatabase();
 
-    final List<Map<String, dynamic>> maps = await db.query('carros',
-        where: "vendido = true AND dataVenda = $month");
+    final List<Map<String, dynamic>> maps = await db.query('carros', where: "vendido = true");
 
     return List.generate(
       maps.length,
       (i) {
         return Car.fromJSON(maps[i]);
       },
-    );
+    ).where((element) => element.dataVenda.month == month).toList();
   }
 
   Future<List<Car>> estoque() async {
     // Get a reference to the database.
     final db = await _getDatabase();
 
-    final List<Map<String, dynamic>> maps =
-        await db.query('carros', where: "vendido = false");
+    final List<Map<String, dynamic>> maps = await db.query('carros', where: "vendido = false");
 
     return List.generate(
       maps.length,
@@ -122,21 +120,20 @@ CREATE TABLE IF NOT EXISTS carros (
     // Get a reference to the database.
     final db = await _getDatabase();
 
-    final List<Map<String, dynamic>> maps = await db.query('carros',
-        where: "vendido = false AND dataVenda = $month");
+    final List<Map<String, dynamic>> maps = await db.query('carros', where: "vendido = false");
 
     return List.generate(
       maps.length,
       (i) {
         return Car.fromJSON(maps[i]);
       },
-    );
+    ).where((element) => element.dataVenda.month == month).toList();
   }
 
-  Future<void> venderCarro(int id, double valor) async {
+  Future<void> venderCarro(int id, double valor, DateTime data) async {
     final db = await _getDatabase();
 
-    await db.update('carros', {"vendido": 1, 'valor': valor},
+    await db.update('carros', {"vendido": 1, 'valor': valor, "dataVenda": data.millisecondsSinceEpoch},
         where: "id = $id");
   }
 }

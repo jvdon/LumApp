@@ -1,12 +1,11 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:lumapp/db/car_db.dart';
 import 'package:lumapp/models/car.dart';
 import 'package:lumapp/models/debito.dart';
-
-import 'package:validadores/Validador.dart';
+import 'package:lumapp/partials/textIcon.dart';
+import '../partials/displays.dart';
 
 class EditPage extends StatefulWidget {
   Car carro;
@@ -30,11 +29,13 @@ class _EditPageState extends State<EditPage> {
 
   TextEditingController color = TextEditingController();
 
-  MoneyMaskedTextController valor = MoneyMaskedTextController(
-      decimalSeparator: ",", thousandSeparator: ".", leftSymbol: "R\$ ");
+  MoneyMaskedTextController valor =
+      MoneyMaskedTextController(decimalSeparator: ",", thousandSeparator: ".", leftSymbol: "R\$ ");
 
   TextEditingController cliente = TextEditingController();
   final _formKey = GlobalKey<FormState>();
+
+  DateTime dataVenda = DateTime.now();
 
   @override
   void initState() {
@@ -54,6 +55,8 @@ class _EditPageState extends State<EditPage> {
       initialValue: widget.carro.valor,
     );
     cliente = TextEditingController(text: widget.carro.cliente);
+    dataVenda = widget.carro.dataVenda;
+    super.initState();
   }
 
   @override
@@ -73,25 +76,15 @@ class _EditPageState extends State<EditPage> {
                   flex: 2,
                   child: Column(
                     children: [
-                      const SizedBox(
-                        height: 10,
-                      ),
+                      const SizedBox(height: 10),
                       editInput("CLIENTE", cliente, 200, null),
-                      const SizedBox(
-                        height: 10,
-                      ),
+                      const SizedBox(height: 10),
                       editInput("CHASSI", chassi, 200, null),
-                      const SizedBox(
-                        height: 10,
-                      ),
+                      const SizedBox(height: 10),
                       editInput("RENAVAM", revavam, 200, null),
-                      const SizedBox(
-                        height: 10,
-                      ),
+                      const SizedBox(height: 10),
                       editInput("PLACA", placa, 200, null),
-                      const SizedBox(
-                        height: 10,
-                      ),
+                      const SizedBox(height: 10),
                       editInput("VALOR", valor, 200, null),
                     ],
                   ),
@@ -100,35 +93,46 @@ class _EditPageState extends State<EditPage> {
                   flex: 2,
                   child: Column(
                     children: [
-                      const SizedBox(
-                        height: 10,
-                      ),
+                      const SizedBox(height: 10),
                       editInput("MARCA", marca, 200, null),
-                      const SizedBox(
-                        height: 10,
-                      ),
+                      const SizedBox(height: 10),
                       editInput("MODELO", modelo, 200, null),
-                      const SizedBox(
-                        height: 10,
-                      ),
+                      const SizedBox(height: 10),
                       editInput("ANO MODELO", anoMod, 200, null),
-                      const SizedBox(
-                        height: 10,
+                      const SizedBox(height: 10),
+                      Container(
+                        width: 200,
+                        height: 50,
+                        child: GestureDetector(
+                          onTap: () {
+                            showDatePicker(
+                              context: context,
+                              firstDate: DateTime.now().subtract(Duration(days: 270)),
+                              currentDate: dataVenda,
+                              lastDate: DateTime.now().add(Duration(days: 270)),
+                            ).then(
+                              (value) {
+                                if (value != null) {
+                                  setState(() {
+                                    dataVenda = value;
+                                  });
+                                }
+                              },
+                            );
+                          },
+                          child: TextIcon(text: format.format(dataVenda), icon: Icons.date_range, width: 200),
+                        ),
                       ),
-                      editInput("ANO", anoFab, 200, null),
-                      const SizedBox(
-                        height: 10,
-                      ),
+                      const SizedBox(height: 10),
                       DropdownMenu(
+                        width: 200,
                         controller: tipo,
                         label: const Text(
                           "Tipo Motor",
                         ),
                         hintText: "Tipo Carro",
-                        dropdownMenuEntries: TipoCarro.values
-                            .map((e) =>
-                                DropdownMenuEntry(value: e.name, label: e.name))
-                            .toList(),
+                        dropdownMenuEntries:
+                            TipoCarro.values.map((e) => DropdownMenuEntry(value: e.name, label: e.name)).toList(),
                       ),
                     ],
                   ),
@@ -138,25 +142,25 @@ class _EditPageState extends State<EditPage> {
           ),
           IconButton(
             onPressed: () async {
-              CarDB db = CarDB();
-
               if (_formKey.currentState!.validate()) {
                 int id = widget.carro.id;
                 Car carro = Car(
-                    cliente: cliente.text,
-                    placa: placa.text,
-                    marca: marca.text,
-                    modelo: modelo.text,
-                    chassi: chassi.text,
-                    renavam: revavam.text,
-                    tipo: TipoCarro.values.byName(tipo.text),
-                    dataVenda: DateTime.now().month,
-                    anoMod: int.tryParse(anoMod.text) ?? -1,
-                    anoFab: int.tryParse(anoFab.text) ?? -1,
-                    vendido: widget.carro.vendido,
-                    color: Car_Colors.values.byName(color.text),
-                    debitos: widget.carro.debitos,
-                    valor: valor.numberValue);
+                  cliente: cliente.text,
+                  placa: placa.text,
+                  marca: marca.text,
+                  modelo: modelo.text,
+                  chassi: chassi.text,
+                  renavam: revavam.text,
+                  tipo: TipoCarro.values.byName(tipo.text),
+                  dataVenda: dataVenda,
+                  anoMod: int.tryParse(anoMod.text) ?? -1,
+                  anoFab: int.tryParse(anoFab.text) ?? -1,
+                  vendido: widget.carro.vendido,
+                  color: Car_Colors.values.byName(color.text),
+                  debitos: widget.carro.debitos,
+                  valor: valor.numberValue,
+                  procuracoes: widget.carro.procuracoes,
+                );
 
                 widget.carro = carro;
                 try {
@@ -193,49 +197,7 @@ Widget _buildTipoSelector(TextEditingController controller) {
       leadingIcon: const Icon(Icons.numbers),
       label: const Text("Tipo Debito"),
       controller: controller,
-      dropdownMenuEntries: TipoDebito.values
-          .map((e) => DropdownMenuEntry(value: e, label: e.name))
-          .toList(),
-    ),
-  );
-}
-
-Widget editInput(String label, TextEditingController controller, double width,
-    TextInputFormatter? formatter,
-    {int maxLength = 20}) {
-  return Container(
-    width: width,
-    child: TextFormField(
-      style: const TextStyle(fontSize: 16),
-      maxLength: maxLength,
-      textCapitalization: TextCapitalization.characters,
-      controller: controller,
-      decoration: InputDecoration(
-        labelStyle: const TextStyle(fontSize: 14),
-        label: Text(label),
-        hintText: label,
-      ),
-      validator: (value) => Validador().add(Validar.OBRIGATORIO).validar(value),
-      inputFormatters: (formatter != null) ? [formatter] : [],
-    ),
-  );
-}
-
-Widget _buildDisplay(String label, String content, IconData icon) {
-  return InputDecorator(
-    decoration: InputDecoration(
-      labelText: label,
-      labelStyle: const TextStyle(fontSize: 24),
-      enabledBorder: OutlineInputBorder(
-        borderSide: const BorderSide(color: Colors.white, width: 2),
-        borderRadius: BorderRadius.circular(10.0),
-      ),
-    ),
-    child: Row(
-      children: [
-        Icon(icon),
-        Text(content),
-      ],
+      dropdownMenuEntries: TipoDebito.values.map((e) => DropdownMenuEntry(value: e, label: e.name)).toList(),
     ),
   );
 }

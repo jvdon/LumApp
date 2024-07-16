@@ -1,12 +1,12 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:flutter_masked_text2/flutter_masked_text2.dart';
 import 'package:lumapp/db/car_db.dart';
 import 'package:lumapp/models/car.dart';
 import 'package:lumapp/models/debito.dart';
+import 'package:lumapp/models/procuracao.dart';
+import 'package:lumapp/partials/displays.dart';
 import 'package:mask_text_input_formatter/mask_text_input_formatter.dart';
-import 'package:validadores/Validador.dart';
 
 class CadastroPage extends StatefulWidget {
   final TipoCadastro tipoCadastro;
@@ -30,15 +30,19 @@ TextEditingController anoFab = TextEditingController();
 
 TextEditingController color = TextEditingController();
 
-MoneyMaskedTextController valor = MoneyMaskedTextController(
-    decimalSeparator: ",", thousandSeparator: ".", leftSymbol: "R\$ ");
+MoneyMaskedTextController valor =
+    MoneyMaskedTextController(decimalSeparator: ",", thousandSeparator: ".", leftSymbol: "R\$ ");
 
 TextEditingController cliente = TextEditingController();
+
+DateTime dataVenda = DateTime.now();
 
 final _formKey = GlobalKey<FormState>();
 
 List<Debito> debitos = [];
 double debitoTotal = 0;
+
+List<Procuracao> procuracoes = [];
 
 class _CadastroPageState extends State<CadastroPage> {
   @override
@@ -56,8 +60,7 @@ class _CadastroPageState extends State<CadastroPage> {
 
     color = TextEditingController();
 
-    valor = MoneyMaskedTextController(
-        decimalSeparator: ",", thousandSeparator: ".", leftSymbol: "R\$ ");
+    valor = MoneyMaskedTextController(decimalSeparator: ",", thousandSeparator: ".", leftSymbol: "R\$ ");
 
     cliente = TextEditingController();
     debitos = [];
@@ -97,12 +100,7 @@ class _CadastroPageState extends State<CadastroPage> {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       textInput(
-                          (widget.tipoCadastro == TipoCadastro.COMPRA)
-                              ? "Comprador"
-                              : "Vendedor",
-                          cliente,
-                          200,
-                          null,
+                          (widget.tipoCadastro == TipoCadastro.COMPRA) ? "Comprador" : "Vendedor", cliente, 200, null,
                           maxLength: 200),
                       textInput("RENAVAM", revavam, 200, null),
                       textInput("CHASSI", chassi, 200, null),
@@ -111,17 +109,13 @@ class _CadastroPageState extends State<CadastroPage> {
                           placa,
                           200,
                           MaskTextInputFormatter(
-                              mask: '#######',
-                              filter: {"#": RegExp(r'[A-Z0-9]')},
-                              type: MaskAutoCompletionType.lazy)),
+                              mask: '#######', filter: {"#": RegExp(r'[A-Z0-9]')}, type: MaskAutoCompletionType.lazy)),
                       textInput(
                           "Placa Brasil",
                           placa,
                           200,
                           MaskTextInputFormatter(
-                              mask: '###-####',
-                              filter: {"#": RegExp(r'[A-Z0-9]')},
-                              type: MaskAutoCompletionType.lazy)),
+                              mask: '###-####', filter: {"#": RegExp(r'[A-Z0-9]')}, type: MaskAutoCompletionType.lazy)),
                       textInput("Valor", valor, 200, null)
                     ],
                   ),
@@ -137,8 +131,7 @@ class _CadastroPageState extends State<CadastroPage> {
                     labelText: 'Carro',
                     labelStyle: const TextStyle(fontSize: 24),
                     enabledBorder: OutlineInputBorder(
-                      borderSide:
-                          const BorderSide(color: Colors.white, width: 2),
+                      borderSide: const BorderSide(color: Colors.white, width: 2),
                       borderRadius: BorderRadius.circular(10.0),
                     ),
                   ),
@@ -152,26 +145,42 @@ class _CadastroPageState extends State<CadastroPage> {
                         anoMod,
                         50,
                         MaskTextInputFormatter(
-                            mask: '####',
-                            filter: {"#": RegExp(r'[0-9]')},
-                            type: MaskAutoCompletionType.lazy),
+                            mask: '####', filter: {"#": RegExp(r'[0-9]')}, type: MaskAutoCompletionType.lazy),
                       ),
                       textInput(
                         "Ano Modelo",
                         anoFab,
                         100,
                         MaskTextInputFormatter(
-                            mask: '####',
-                            filter: {"#": RegExp(r'[0-9]')},
-                            type: MaskAutoCompletionType.lazy),
+                            mask: '####', filter: {"#": RegExp(r'[0-9]')}, type: MaskAutoCompletionType.lazy),
                       ),
+                      GestureDetector(
+                          onTap: () {
+                            showDatePicker(
+                              context: context,
+                              firstDate: DateTime.now().subtract(Duration(days: 270)),
+                              currentDate: dataVenda,
+                              lastDate: DateTime.now().add(Duration(days: 270)),
+                            ).then(
+                              (value) {
+                                if (value != null) {
+                                  setState(() {
+                                    dataVenda = value;
+                                  });
+                                }
+                              },
+                            );
+                          },
+                          child: Container(
+                            width: 200,
+                            height: 50,
+                            child: buildDisplay("Data ${widget.tipoCadastro.name}", format.format(dataVenda), Icons.date_range),
+                          )),
                       DropdownMenu(
                           controller: tipo,
                           hintText: "Tipo Carro",
-                          dropdownMenuEntries: TipoCarro.values
-                              .map((e) => DropdownMenuEntry(
-                                  value: e.name, label: e.name))
-                              .toList()),
+                          dropdownMenuEntries:
+                              TipoCarro.values.map((e) => DropdownMenuEntry(value: e.name, label: e.name)).toList()),
                       _buildColorSelector(color)
                     ],
                   ),
@@ -226,20 +235,14 @@ class _CadastroPageState extends State<CadastroPage> {
                                 showDialog(
                                   context: context,
                                   builder: (context) {
-                                    TextEditingController tipo =
-                                        TextEditingController();
+                                    TextEditingController tipo = TextEditingController();
 
-                                    TextEditingController info =
-                                        TextEditingController();
+                                    TextEditingController info = TextEditingController();
 
-                                    TextEditingController amount =
-                                        TextEditingController();
+                                    TextEditingController amount = TextEditingController();
 
-                                    MoneyMaskedTextController valor =
-                                        MoneyMaskedTextController(
-                                            decimalSeparator: ",",
-                                            thousandSeparator: ".",
-                                            leftSymbol: "R\$ ");
+                                    MoneyMaskedTextController valor = MoneyMaskedTextController(
+                                        decimalSeparator: ",", thousandSeparator: ".", leftSymbol: "R\$ ");
 
                                     return Dialog(
                                       child: Container(
@@ -247,35 +250,24 @@ class _CadastroPageState extends State<CadastroPage> {
                                         height: 350,
                                         child: Column(
                                           mainAxisSize: MainAxisSize.max,
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
+                                          mainAxisAlignment: MainAxisAlignment.center,
                                           children: [
-                                            _buildTipoSelector(tipo),
-                                            textInput("Info", info, 150, null,
-                                                maxLength: 200),
-                                            textInput(
-                                                "Valor", valor, 150, null),
-                                            textInput(
-                                                "Amount", amount, 150, null),
+                                            buildTipoSelector(tipo),
+                                            textInput("Info", info, 150, null, maxLength: 200),
+                                            textInput("Valor", valor, 150, null),
+                                            textInput("Amount", amount, 150, null),
                                             IconButton(
                                               onPressed: () {
-                                                if (tipo.text.isNotEmpty &&
-                                                    !valor.numberValue.isNaN) {
+                                                if (tipo.text.isNotEmpty && !valor.numberValue.isNaN) {
                                                   Debito debito = Debito(
-                                                      tipoDebito: TipoDebito
-                                                          .values
-                                                          .byName(tipo.text),
+                                                      tipoDebito: TipoDebito.values.byName(tipo.text),
                                                       info: info.text,
                                                       valor: valor.numberValue);
                                                   setState(() {
-                                                    int amountInt =
-                                                        int.tryParse(amount.text) ?? 1;
+                                                    int amountInt = int.tryParse(amount.text) ?? 1;
 
-                                                    for (var i = 0;
-                                                        i < amountInt;
-                                                        i++) {
-                                                      debitoTotal +=
-                                                          debito.valor;
+                                                    for (var i = 0; i < amountInt; i++) {
+                                                      debitoTotal += debito.valor;
                                                       debitos.add(debito);
                                                     }
                                                     Navigator.of(context).pop();
@@ -317,35 +309,32 @@ class _CadastroPageState extends State<CadastroPage> {
                 child: IconButton(
                   onPressed: () async {
                     if (_formKey.currentState!.validate()) {
-                      bool vendido =
-                          (widget.tipoCadastro == TipoCadastro.COMPRA)
-                              ? false
-                              : true;
+                      bool vendido = (widget.tipoCadastro == TipoCadastro.COMPRA) ? false : true;
                       Car carro = Car(
-                          cliente: cliente.text,
-                          placa: placa.text,
-                          marca: marca.text,
-                          modelo: modelo.text,
-                          chassi: chassi.text,
-                          renavam: revavam.text,
-                          tipo: TipoCarro.values.byName(tipo.text),
-                          dataVenda: DateTime.now().month,
-                          anoMod: int.tryParse(anoMod.text) ?? -1,
-                          anoFab: int.tryParse(anoFab.text) ?? -1,
-                          vendido: vendido,
-                          color: Car_Colors.values.byName(color.text),
-                          debitos: debitos,
-                          valor: valor.numberValue);
+                        cliente: cliente.text,
+                        placa: placa.text,
+                        marca: marca.text,
+                        modelo: modelo.text,
+                        chassi: chassi.text,
+                        renavam: revavam.text,
+                        tipo: TipoCarro.values.byName(tipo.text),
+                        dataVenda: DateTime.now(),
+                        anoMod: int.tryParse(anoMod.text) ?? -1,
+                        anoFab: int.tryParse(anoFab.text) ?? -1,
+                        vendido: vendido,
+                        color: Car_Colors.values.byName(color.text),
+                        debitos: debitos,
+                        valor: valor.numberValue,
+                        procuracoes: procuracoes,
+                      );
                       try {
                         await CarDB().insertCarro(carro);
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(
-                                "${widget.tipoCadastro.name} realizada com sucesso")));
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(SnackBar(content: Text("${widget.tipoCadastro.name} realizada com sucesso")));
                         Navigator.of(context).pop();
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                            content: Text(
-                                "Erro ao realizar ${widget.tipoCadastro.name}")));
+                        ScaffoldMessenger.of(context)
+                            .showSnackBar(SnackBar(content: Text("Erro ao realizar ${widget.tipoCadastro.name}")));
                       }
                     }
                   },
@@ -360,53 +349,15 @@ class _CadastroPageState extends State<CadastroPage> {
   }
 }
 
-Widget _buildTipoSelector(TextEditingController controller) {
-  return Container(
-    child: DropdownMenu<TipoDebito>(
-      leadingIcon: Icon(Icons.numbers),
-      label: const Text("Tipo Debito"),
-      controller: controller,
-      dropdownMenuEntries: TipoDebito.values
-          .map((e) => DropdownMenuEntry(value: e, label: e.name))
-          .toList(),
-    ),
-  );
-}
-
 Widget _buildColorSelector(TextEditingController controller) {
   return DropdownMenu(
     leadingIcon: Icon(
       Icons.color_lens_outlined,
-      color: controller.text.isNotEmpty
-          ? Cores[Car_Colors.values.byName(controller.text)]
-          : Colors.white,
+      color: controller.text.isNotEmpty ? Cores[Car_Colors.values.byName(controller.text)] : Colors.white,
     ),
     label: const Text("Cor"),
     controller: controller,
-    dropdownMenuEntries: Car_Colors.values
-        .map((e) => DropdownMenuEntry(value: e, label: e.name))
-        .toList(),
-  );
-}
-
-Widget textInput(String label, TextEditingController controller, double width,
-    TextInputFormatter? formatter,
-    {int maxLength = 20}) {
-  return Container(
-    width: width,
-    child: TextFormField(
-      style: TextStyle(fontSize: 16),
-      maxLength: maxLength,
-      textCapitalization: TextCapitalization.characters,
-      controller: controller,
-      decoration: InputDecoration(
-        labelStyle: TextStyle(fontSize: 14),
-        label: Text(label),
-        hintText: label,
-      ),
-      validator: (value) => Validador().add(Validar.OBRIGATORIO).validar(value),
-      inputFormatters: (formatter != null) ? [formatter] : [],
-    ),
+    dropdownMenuEntries: Car_Colors.values.map((e) => DropdownMenuEntry(value: e, label: e.name)).toList(),
   );
 }
 

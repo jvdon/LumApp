@@ -1,3 +1,5 @@
+import 'dart:io';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/widgets.dart';
@@ -7,8 +9,12 @@ import 'package:lumapp/models/car.dart';
 import 'package:lumapp/pages/cadastro_page.dart';
 import 'package:lumapp/partials/car_item.dart';
 import 'package:lumapp/partials/displays.dart';
-import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:path_provider/path_provider.dart';
+import 'package:path/path.dart';
+import 'package:open_filex/open_filex.dart';
 
 class BoughtPage extends StatefulWidget {
   const BoughtPage({super.key});
@@ -66,6 +72,122 @@ class _BoughtPageState extends State<BoughtPage> {
                 appBar: AppBar(
                   title: const Text("Carros comprados"),
                   actions: [
+                    IconButton(
+                        onPressed: () async {
+                          final pdf = pw.Document();
+                          pdf.addPage(
+                            pw.Page(
+                              pageFormat: PdfPageFormat.a4,
+                              build: (pw.Context context) {
+                                if (carros.isNotEmpty) {
+                                  print(context.page.size.toDouble());
+                                  return pw.Column(
+                                    mainAxisAlignment: pw.MainAxisAlignment.start,
+                                    children: [
+                                      pw.Container(
+                                        height: 100,
+                                        width: double.infinity,
+                                        child: pw.Column(
+                                          mainAxisAlignment: pw.MainAxisAlignment.start,
+                                          crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                          children: [
+                                            pw.Text("Carros: ${carros.length}"),
+                                            pw.SizedBox(width: 10),
+                                            pw.Text(
+                                                "Valor Total: R\$ ${carros.isEmpty ? 0 : carros.map((e) => e.valor).reduce((value, element) => value + element)}"),
+                                          ],
+                                        ),
+                                      ),
+                                    ],
+                                  );
+                                } else {
+                                  return pw.Center(child: pw.Column(children: [pw.Text("Nenhum Carro Cadastrado")]));
+                                }
+                              },
+                            ),
+                          );
+
+                          for (var i = 0; i < carros.length; i += 3) {
+                            var carroSubset = [
+                              carros.elementAtOrNull(i),
+                              carros.elementAtOrNull(i + 1),
+                              carros.elementAtOrNull(i + 2)
+                            ];
+                            print(i);
+                            pdf.addPage(
+                              pw.Page(
+                                pageFormat: PdfPageFormat.a4,
+                                build: (pw.Context context) {
+                                  if (carros.isNotEmpty) {
+                                    print(context.page.size.toDouble());
+                                    return pw.ListView.builder(
+                                      itemCount: carroSubset.length,
+                                      itemBuilder: (context, index) {
+                                        Car? carro = carroSubset[index];
+                                        if (carro != null) {
+                                          return pw.Column(
+                                            mainAxisAlignment: pw.MainAxisAlignment.start,
+                                            crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                            children: [
+                                              pw.Row(children: [
+                                                pw.Text("#${carro.id.toString()}"),
+                                                pw.SizedBox(width: 5),
+                                                pw.Text("${carro.marca} ${carro.modelo}"),
+                                                pw.SizedBox(width: 5),
+                                                pw.Text(carro.cliente)
+                                              ]),
+                                              pw.SizedBox(height: 20),
+                                              pw.Column(
+                                                mainAxisAlignment: pw.MainAxisAlignment.start,
+                                                crossAxisAlignment: pw.CrossAxisAlignment.start,
+                                                children: [
+                                                  pw.Text("Placa: ${carro.placa}"),
+                                                  pw.SizedBox(height: 5),
+                                                  pw.Text("CHASSI: ${carro.chassi}"),
+                                                  pw.SizedBox(height: 5),
+                                                  pw.Text("RENAVAM: ${carro.renavam}"),
+                                                  pw.SizedBox(height: 5),
+                                                  pw.Text("Cor: ${carro.color.name}"),
+                                                  pw.SizedBox(height: 5),
+                                                  pw.Text("Tipo Motor: ${carro.tipo.name} "),
+                                                  pw.SizedBox(height: 5),
+                                                  pw.Text("Ano Modelo: ${carro.anoMod}"),
+                                                  pw.SizedBox(height: 5),
+                                                  pw.Text("Ano: ${carro.anoFab}"),
+                                                  pw.SizedBox(height: 5),
+                                                  pw.Text("Valor: R\$ ${carro.valor}"),
+                                                  pw.SizedBox(height: 5),
+                                                  pw.Text("Debitos: R\$ ${carro.totalDebitos}"),
+                                                  pw.SizedBox(height: 5),
+                                                ],
+                                              ),
+                                              pw.SizedBox(height: 20),
+                                            ],
+                                          );
+                                        } else {
+                                          return pw.Container();
+                                        }
+                                      },
+                                    );
+                                  } else {
+                                    return pw.Center(child: pw.Column(children: [pw.Text("Nenhum Carro Cadastrado")]));
+                                  }
+                                },
+                              ),
+                            );
+                          }
+
+                          final documentsPath = await getApplicationDocumentsDirectory();
+
+                          final filePath =
+                              join(documentsPath.path, "Estoque_${DateTime.now().month}_${DateTime.now().year}.pdf");
+                          final file = File(filePath);
+                          await file.writeAsBytes(await pdf.save());
+                          OpenFilex.open(filePath);
+
+                          print(filePath);
+                        },
+                        icon: const Icon(Icons.print_rounded)),
                     IconButton(onPressed: refresh, icon: const Icon(Icons.refresh)),
                     DropdownMenu(
                       initialSelection: month,

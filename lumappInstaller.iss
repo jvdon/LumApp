@@ -44,11 +44,11 @@ Name: "portuguese"; MessagesFile: "compiler:Languages\Portuguese.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\jvdon\Scripts\lumapp\build\windows\runner\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\jvdon\Scripts\lumapp\build\windows\runner\Release\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\jvdon\Scripts\lumapp\build\windows\runner\Release\sqlite3.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\jvdon\Scripts\lumapp\build\windows\runner\Release\sqlite3_flutter_libs_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\jvdon\Scripts\lumapp\build\windows\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "C:\Users\jvdon\Scripts\lumapp\build\windows\x64\runner\Release\{#MyAppExeName}"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\jvdon\Scripts\lumapp\build\windows\x64\runner\Release\flutter_windows.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\jvdon\Scripts\lumapp\build\windows\x64\runner\Release\sqlite3.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\jvdon\Scripts\lumapp\build\windows\x64\runner\Release\sqlite3_flutter_libs_plugin.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "C:\Users\jvdon\Scripts\lumapp\build\windows\x64\runner\Release\data\*"; DestDir: "{app}\data"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "C:\Program Files\Microsoft\jdk-11.0.16.101-hotspot\bin\vcruntime140.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\Microsoft\jdk-11.0.16.101-hotspot\bin\vcruntime140_1.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "C:\Program Files\Microsoft\jdk-11.0.16.101-hotspot\bin\msvcp140.dll"; DestDir: "{app}"; Flags: ignoreversion

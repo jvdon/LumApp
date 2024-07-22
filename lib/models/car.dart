@@ -76,7 +76,7 @@ class Car {
 
     totalDebitos = debitos.isEmpty ? 0 : debitos.map((e) => e.valor).reduce((a, b) => a + b);
 
-    procuracoes = (jsonDecode(json["procuracoes"]) as List).map((e) => Procuracao.fromJson(e)).toList();
+    procuracoes = (jsonDecode(json["procuracoes"]) as List).map((e) => Procuracao.fromMap(e)).toList();
   }
 
   Map<String, dynamic> toMap() {
@@ -95,7 +95,7 @@ class Car {
       "valor": valor,
       "dataVenda": dataVenda.millisecondsSinceEpoch,
       "debitos": jsonEncode(debitos.map((e) => e.toMap()).toList()),
-      "procuracoes": jsonEncode(this.procuracoes.map((e) => e.toMap()).toList()),
+      "procuracoes": jsonEncode(procuracoes.map((e) => e.toMap()).toList()),
     };
   }
 }

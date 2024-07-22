@@ -65,6 +65,7 @@ class _CadastroPageState extends State<CadastroPage> {
     cliente = TextEditingController();
     debitos = [];
     debitoTotal = 0;
+    procuracoes = [];
   }
 
   @override
@@ -174,7 +175,8 @@ class _CadastroPageState extends State<CadastroPage> {
                           child: Container(
                             width: 200,
                             height: 50,
-                            child: buildDisplay("Data ${widget.tipoCadastro.name}", format.format(dataVenda), Icons.date_range),
+                            child: buildDisplay(
+                                "Data ${widget.tipoCadastro.name}", format.format(dataVenda), Icons.date_range),
                           )),
                       DropdownMenu(
                           controller: tipo,
@@ -298,6 +300,126 @@ class _CadastroPageState extends State<CadastroPage> {
               ),
               // const SizedBox(height: 10),
               const SizedBox(height: 10),
+              // Debitos
+              InputDecorator(
+                decoration: InputDecoration(
+                  labelText: 'Procurações',
+                  labelStyle: const TextStyle(fontSize: 24),
+                  enabledBorder: OutlineInputBorder(
+                    borderSide: const BorderSide(color: Colors.white, width: 2),
+                    borderRadius: BorderRadius.circular(10.0),
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      height: 120,
+                      child: Row(
+                        children: [
+                          Expanded(
+                            flex: 16,
+                            child: ListView.builder(
+                              itemCount: procuracoes.length,
+                              scrollDirection: Axis.horizontal,
+                              itemBuilder: (context, index) {
+                                Procuracao procuracao = procuracoes[index];
+                                return Column(children: [
+                                  const Icon(CupertinoIcons.paperplane),
+                                  Text("DE: ${procuracao.a}"),
+                                  Text("PARA: ${procuracao.b}"),
+                                  Text(format.format(procuracao.vencimento)),
+                                  IconButton(
+                                      onPressed: () {
+                                        setState(() {
+                                          procuracoes.remove(procuracao);
+                                        });
+                                      },
+                                      icon: const Icon(Icons.remove_circle))
+                                ]);
+                              },
+                            ),
+                          ),
+                          Expanded(
+                            flex: 2,
+                            child: IconButton(
+                              onPressed: () {
+                                showDialog(
+                                  context: context,
+                                  builder: (context) {
+                                    TextEditingController de = TextEditingController();
+
+                                    TextEditingController para = TextEditingController();
+
+                                    DateTime data = DateTime.now();
+
+                                    MoneyMaskedTextController valor = MoneyMaskedTextController(
+                                        decimalSeparator: ",", thousandSeparator: ".", leftSymbol: "R\$ ");
+
+                                    return Dialog(
+                                      child: Container(
+                                        width: 200,
+                                        height: 350,
+                                        child: Column(
+                                          mainAxisSize: MainAxisSize.max,
+                                          mainAxisAlignment: MainAxisAlignment.center,
+                                          children: [
+                                            textInput("De", de, 150, null, maxLength: 200),
+                                            textInput("Para", para, 150, null),
+                                            Container(
+                                              width: 200,
+                                              height: 50,
+                                              child: GestureDetector(
+                                                child: buildDisplay("Data", format.format(data), Icons.date_range),
+                                                onTap: () {
+                                                  showDatePicker(
+                                                    context: context,
+                                                    firstDate: DateTime.now().subtract(Duration(days: 240)),
+                                                    currentDate: DateTime.now(),
+                                                    lastDate: DateTime.now().add(Duration(days: 240)),
+                                                  ).then(
+                                                    (value) {
+                                                      if (value != null) {
+                                                        setState(() {
+                                                          data = value;
+                                                        });
+                                                      }
+                                                    },
+                                                  );
+                                                },
+                                              ),
+                                            ),
+                                            IconButton(
+                                              onPressed: () {
+                                                if (de.text.isNotEmpty && para.text.isNotEmpty) {
+                                                  Procuracao proc =
+                                                      Procuracao(a: de.text, b: para.text, vencimento: data);
+                                                  setState(() {
+                                                    procuracoes.add(proc);
+                                                    Navigator.of(context).pop();
+                                                  });
+                                                }
+                                              },
+                                              icon: const Icon(
+                                                Icons.add_card,
+                                                size: 32,
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                );
+                              },
+                              icon: const Icon(Icons.add_card),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               InputDecorator(
                 decoration: InputDecoration(
                   labelStyle: const TextStyle(fontSize: 24),

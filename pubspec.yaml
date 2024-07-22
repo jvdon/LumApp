@@ -60,7 +60,9 @@ dev_dependencies:
   pix_flutter: ^2.2.0
   qr_flutter: ^4.1.0
   shared_preferences:
-
+  pdf: ^3.11.0
+  open_filex: ^4.4.0
+  
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
 

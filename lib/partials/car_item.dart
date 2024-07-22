@@ -13,7 +13,7 @@ class CarItem extends StatefulWidget {
   final Car carro;
   final Function() notifyParent;
   const CarItem({super.key, required this.carro, required this.notifyParent});
-  
+
   @override
   State<CarItem> createState() => _CarItemState();
 }
@@ -149,7 +149,7 @@ class _CarItemState extends State<CarItem> {
                   CarDB db = CarDB();
 
                   List<Debito> debitos = widget.carro.debitos;
-                  double debitoTotal = 0;
+                  double debitoTotal = (debitos.isNotEmpty) ? debitos.map((e) => e.valor).reduce((a, b) => a + b) : 0;
 
                   TextEditingController tipo = TextEditingController();
 
@@ -159,10 +159,6 @@ class _CarItemState extends State<CarItem> {
 
                   MoneyMaskedTextController valor =
                       MoneyMaskedTextController(decimalSeparator: ",", thousandSeparator: ".", leftSymbol: "R\$ ");
-
-                  debitos.forEach(
-                    (element) => debitoTotal += element.valor,
-                  );
 
                   showDialog(
                     context: context,
@@ -354,8 +350,19 @@ class _CarItemState extends State<CarItem> {
                                     "Garantia",
                                     "Vence Dia: ${format.format(widget.carro.dataVenda.add(Duration(days: 90)))}",
                                     Icons.date_range_outlined),
-                              if (widget.carro.dataVenda.isAfter(DateTime.now().add(Duration(days: 90))))
-                                buildDisplay("Procuração", "content", Icons.date_range_outlined),
+                              SizedBox(
+                                height: 20,
+                              ),
+                              if (DateTime.now().isAfter(widget.carro.dataVenda.add(Duration(days: 110))))
+                                buildDisplay(
+                                    "Procuração",
+                                    "Expirada Venceu Dia: ${format.format(widget.carro.dataVenda.add(Duration(days: 110)))}",
+                                    Icons.date_range_outlined)
+                              else
+                                buildDisplay(
+                                    "Procuração",
+                                    "Vence Dia: ${format.format(widget.carro.dataVenda.add(Duration(days: 110)))}",
+                                    Icons.date_range_outlined),
                             ],
                           ),
                         ),
